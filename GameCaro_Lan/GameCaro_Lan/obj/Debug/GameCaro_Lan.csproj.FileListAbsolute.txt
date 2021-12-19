@@ -1,0 +1,10 @@
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\bin\Debug\GameCaro_Lan.exe.config
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\bin\Debug\GameCaro_Lan.exe
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\bin\Debug\GameCaro_Lan.pdb
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\obj\Debug\GameCaro_Lan.csproj.AssemblyReference.cache
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\obj\Debug\GameCaro_Lan.Form1.resources
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\obj\Debug\GameCaro_Lan.Properties.Resources.resources
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\obj\Debug\GameCaro_Lan.csproj.GenerateResource.cache
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\obj\Debug\GameCaro_Lan.csproj.CoreCompileInputs.cache
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\obj\Debug\GameCaro_Lan.exe
+D:\ThucTapCoSo\GameCaro_Lan\GameCaro_Lan\obj\Debug\GameCaro_Lan.pdb
