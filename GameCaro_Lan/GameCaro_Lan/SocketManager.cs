@@ -79,7 +79,6 @@ namespace GameCaro_Lan
             return target.Send(data) == 1 ? true : false;
         }
 
-
         private bool ReceiveData(Socket target, byte[] data)
         {
             return target.Receive(data) == 1 ? true : false;

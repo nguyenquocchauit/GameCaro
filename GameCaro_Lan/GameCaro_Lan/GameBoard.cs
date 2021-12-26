@@ -13,12 +13,12 @@ namespace GameCaro_Lan
         #region Properties
         private Timer timerStop;
         private Panel chessBoard;
-        private List<Player> players;
         private PictureBox avatar;
         private TextBox playerName;
         private int currentPlayer;
         private List<List<Button>> matrixPositions;
         private Stack<PlayInfo> playTimeLine;
+        private List<Player> players;
         public Panel ChessBoard { get => chessBoard; set => chessBoard = value; }
         public int CurrentPlayer { get => currentPlayer; set => currentPlayer = value; }
         public TextBox PlayerName { get => playerName; set => playerName = value; }
@@ -64,9 +64,9 @@ namespace GameCaro_Lan
             ChessBoard.Controls.Clear();
             ChessBoard.Enabled = true;
             PlayTimeLine = new Stack<PlayInfo>();
+            MatrixPositions = new List<List<Button>>();
             CurrentPlayer = 0;
             ChangePlayer(); // thiết lập người đánh đầu tiên là QuocChau
-            MatrixPositions = new List<List<Button>>();
             Button oldButton = new Button() { Width = 0, Location = new Point(0, 0) };
             for (int i = 0; i < Constant.CHESS_BOARD_WIDTH; i++)
             {
@@ -96,27 +96,26 @@ namespace GameCaro_Lan
                 oldButton.Height = 0;
             }
         }
+        private void ChangePlayer()
+        {
+            PlayerName.Text = Players[CurrentPlayer].Name;
+            Avatar.Image = Players[CurrentPlayer].Avatar;
+        }
+        private void Symbol(Button btn)
+        {
+            btn.BackgroundImage = Players[CurrentPlayer].Symbol;
+            CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
+        }
         private void Btn_Click(object sender, EventArgs e)
         {
             Button btn = sender as Button;
             if (btn.BackgroundImage != null)
                 return; // Nếu ô đã được đánh thì ko cho đánh lại
-            Mark(btn);
+            Symbol(btn);
             PlayTimeLine.Push(new PlayInfo(GetChessPoint(btn), CurrentPlayer, btn.BackgroundImage));
             ChangePlayer();
             if (playerMarked != null)
                 playerMarked(this, new ButtonClickEvent(GetChessPoint(btn)));
-            if (isEndGame(btn))
-                EndGame();
-        }
-        public void OtherPlayerClicked(Point point)
-        {
-            Button btn = MatrixPositions[point.Y][point.X];
-            if (btn.BackgroundImage != null)
-                return; // Nếu ô đã được đánh thì ko cho đánh lại
-            Mark(btn);
-            PlayTimeLine.Push(new PlayInfo(GetChessPoint(btn), CurrentPlayer, btn.BackgroundImage));
-            ChangePlayer();
             if (isEndGame(btn))
                 EndGame();
         }
@@ -127,53 +126,21 @@ namespace GameCaro_Lan
             ChessBoard.Enabled = false;
             DrawGameBoard();
         }
+        public void OtherPlayerClicked(Point point)
+        {
+            Button btn = MatrixPositions[point.Y][point.X];
+            if (btn.BackgroundImage != null)
+                return; // Nếu ô đã được đánh thì ko cho đánh lại
+            Symbol(btn);
+            PlayTimeLine.Push(new PlayInfo(GetChessPoint(btn), CurrentPlayer, btn.BackgroundImage));
+            ChangePlayer();
+            if (isEndGame(btn))
+                EndGame();
+        }
+        
         private bool isEndGame(Button btn)
         {
             return isEndRow(btn) || isEndCol(btn) || isEndAuxiliaryDiagonal(btn) || isEndMainDiagonal(btn);
-        }
-        private void ChangePlayer()
-        {
-            PlayerName.Text = Players[CurrentPlayer].Name;
-            Avatar.Image = Players[CurrentPlayer].Avatar;
-        }
-        private void Mark(Button btn)
-        {
-            btn.BackgroundImage = Players[CurrentPlayer].Symbol;
-            CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
-        }
-        public bool Undo()
-        {
-            if (PlayTimeLine.Count <= 0)
-            {
-                return false;
-            }
-            PlayInfo oldPoint = PlayTimeLine.Peek();
-            
-            return UndoAsStep() && UndoAsStep();
-        }
-
-        private bool UndoAsStep()
-        {
-
-
-            PlayInfo oldPoint = PlayTimeLine.Pop();
-            Button btn = MatrixPositions[oldPoint.Point.Y][oldPoint.Point.X];
-
-            btn.BackgroundImage = null;
-
-
-            if (PlayTimeLine.Count <= 0)
-            {
-                CurrentPlayer = 0;
-            }
-            else
-            {
-                oldPoint = PlayTimeLine.Peek();
-            }
-
-            ChangePlayer();
-
-            return true;
         }
         private Point GetChessPoint(Button btn)
         {
@@ -208,7 +175,7 @@ namespace GameCaro_Lan
                     break;
             }
             
-            return countLeft + countRight == 5;
+            return countLeft + countRight >= 5;
         }
         private bool isEndCol(Button btn)
         {
@@ -236,7 +203,7 @@ namespace GameCaro_Lan
                     break;
             }
 
-            return countTop + countBottom == 5;
+            return countTop + countBottom >= 5;
         }
         private bool isEndMainDiagonal(Button btn)
         {
@@ -245,8 +212,8 @@ namespace GameCaro_Lan
             int countTop = 0;
             for (int i = 0; i <= point.X; i++)
             {
-                if (point.X - i < 0 || point.Y - i < 0)
-                    break;
+                //if (point.X - i < 0 || point.Y - i < 0)
+                //    break;
 
                 if (MatrixPositions[point.Y - i][point.X - i].BackgroundImage == btn.BackgroundImage)
                 {
@@ -259,8 +226,8 @@ namespace GameCaro_Lan
             int countBottom = 0;
             for (int i = 1; i <= Constant.CellWidth - point.X; i++)
             {
-                if (point.Y + i >= Constant.CellHeight || point.X + i >= Constant.CellWidth)
-                    break;
+                //if (point.Y + i >= Constant.CellHeight || point.X + i >= Constant.CellWidth)
+                //    break;
 
                 if (MatrixPositions[point.Y + i][point.X + i].BackgroundImage == btn.BackgroundImage)
                 {
@@ -270,7 +237,7 @@ namespace GameCaro_Lan
                     break;
             }
 
-            return countTop + countBottom == 5;
+            return countTop + countBottom >= 5;
         }
         private bool isEndAuxiliaryDiagonal(Button btn)
         {
@@ -279,8 +246,8 @@ namespace GameCaro_Lan
             int countTop = 0;
             for (int i = 0; i <= point.X; i++)
             {
-                if (point.X + i > Constant.CellWidth || point.Y - i < 0)
-                    break;
+                //if (point.X + i > Constant.CellWidth || point.Y - i < 0)
+                //    break;
 
                 if (MatrixPositions[point.Y - i][point.X + i].BackgroundImage == btn.BackgroundImage)
                 {
@@ -293,8 +260,8 @@ namespace GameCaro_Lan
             int countBottom = 0;
             for (int i = 1; i <= Constant.CellWidth - point.X; i++)
             {
-                if (point.Y + i >= Constant.CellHeight || point.X - i < 0)
-                    break;
+                //if (point.Y + i >= Constant.CellHeight || point.X - i < 0)
+                //    break;
 
                 if (MatrixPositions[point.Y + i][point.X - i].BackgroundImage == btn.BackgroundImage)
                 {
@@ -304,7 +271,41 @@ namespace GameCaro_Lan
                     break;
             }
 
-            return countTop + countBottom == 5;
+            return countTop + countBottom >= 5;
+        }
+        public bool Undo()
+        {
+            //if (PlayTimeLine.Count <= 0)
+            //{
+            //    return false;
+            //}
+            //PlayInfo oldPoint = PlayTimeLine.Peek();
+
+            return UndoAsStep() && UndoAsStep();
+        }
+
+        private bool UndoAsStep()
+        {
+
+
+            PlayInfo oldPoint = PlayTimeLine.Pop();
+            Button btn = MatrixPositions[oldPoint.Point.Y][oldPoint.Point.X];
+
+            btn.BackgroundImage = null;
+
+
+            //if (PlayTimeLine.Count <= 0)
+            //{
+            //    CurrentPlayer = 0;
+            //}
+            //else
+            //{
+            //    oldPoint = PlayTimeLine.Peek();
+            //}
+
+            ChangePlayer();
+
+            return true;
         }
         #endregion
     }

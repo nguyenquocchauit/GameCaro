@@ -17,6 +17,7 @@ namespace GameCaro_Lan
         #region Porperties
         SocketManager socketManager;
         GameBoard chessBoardManager;
+        
         #endregion
         public Form1()
         {
@@ -25,13 +26,14 @@ namespace GameCaro_Lan
             Control.CheckForIllegalCrossThreadCalls = false;
 
             chessBoardManager = new GameBoard(pn_GameBoard, txt_PlayerName, pb_Avatar, tmCoolDown);
+            
 
-           
+
             chessBoardManager.PlayerMarked += ChessBoard_PlayerMarked;
 
             prcbCoolDown.Step = Constant.COOL_DOWN_STEP;
             prcbCoolDown.Maximum = Constant.COOL_DOWN_TIME;
-            prcbCoolDownSezo();
+            prcbCoolDownZero();
 
             tmCoolDown.Interval = Constant.COOL_DOWN_INTERVAL;
 
@@ -51,12 +53,16 @@ namespace GameCaro_Lan
                 socketManager.isServer = true;
                 pn_GameBoard.Enabled = true;
                 socketManager.CreateServer();
+                btn_LAN.Enabled = false;
             }
             else
             {   
                 socketManager.isServer = false;
                 pn_GameBoard.Enabled = false;
+                MessageBox.Show("Kết nối thành công!");
+                btn_LAN.Enabled = false;
                 Listen();
+
             }
 
         }
@@ -116,27 +122,23 @@ namespace GameCaro_Lan
                     break;
                 case (int)SocketCommand.SEND_POINT:
                     this.Invoke((MethodInvoker)(() => {
-                        prcbCoolDownSezo();
+                        prcbCoolDownZero();
                         pn_GameBoard.Enabled = true;
+                        btn_Undo.Enabled = true;
                         tmCoolDown.Start();
                         chessBoardManager.OtherPlayerClicked(data.Point);
-                       
                     }));
                     break;
                 case (int)SocketCommand.UNDO:
                     chessBoardManager.Undo();
-                    prcbCoolDownSezo();
-                    break;
-                case (int)SocketCommand.END_GAME:
-                    tmCoolDown.Stop();
-                    MessageBox.Show(data.Message + " Thắng cuộc");
-                    EndGame();
+                    prcbCoolDownZero();
                     break;
                 case (int)SocketCommand.TIME_OUT:
                     string name = chessBoardManager.Players[chessBoardManager.CurrentPlayer == 1 ? 0 : 1].Name;
                     tmCoolDown.Stop();
                     MessageBox.Show(name + " Thắng cuộc");
                     EndGame();
+                    
                     break;
                 case (int)SocketCommand.QUIT:
                     tmCoolDown.Stop();
@@ -148,36 +150,44 @@ namespace GameCaro_Lan
 
             Listen();
         }
-        #endregion
-
-        void ChessBoard_EndedGame(object sender, EventArgs e)
+        private void ChessBoard_PlayerMarked(object sender, ButtonClickEvent e)
         {
-            EndGame();
-            socketManager.Send(new SocketData((int)SocketCommand.END_GAME, "", new Point()));
+            tmCoolDown.Start();
+            pn_GameBoard.Enabled = false;
+            btn_Undo.Enabled = false;
+            prcbCoolDownZero();
+            socketManager.Send(new SocketData((int)SocketCommand.SEND_POINT, "", e.ClickedPoint));
+            Listen();
         }
+
+        #endregion
+        #region time form 
         private void tmCoolDown_Tick(object sender, EventArgs e)
         {
 
             prcbCoolDown.PerformStep();
-
             if (prcbCoolDown.Value >= prcbCoolDown.Maximum)
             {
                 EndGame();
                 socketManager.Send(new SocketData((int)SocketCommand.TIME_OUT, "", new Point()));
             }
         }
-        void EndGame()
+        public void prcbCoolDownZero()
+        {
+            prcbCoolDown.Value = 0;
+        }
+        #endregion
+        #region eventgame 
+        public void EndGame()
         {
             tmCoolDown.Stop();
             pn_GameBoard.Enabled = false;
-            MessageBox.Show("Kết thúc game");
-
-
+            //MessageBox.Show("Kết thúc game");
         }
-        void NewGame()
+        public void NewGame()
         {
 
-            prcbCoolDownSezo();
+            prcbCoolDownZero();
             tmCoolDown.Stop();
             chessBoardManager.DrawGameBoard();
 
@@ -185,7 +195,7 @@ namespace GameCaro_Lan
         public void Undo()
         {
 
-            prcbCoolDownSezo();
+            prcbCoolDownZero();
             chessBoardManager.Undo();
             socketManager.Send(new SocketData((int)SocketCommand.UNDO, "", new Point()));
         }
@@ -210,6 +220,23 @@ namespace GameCaro_Lan
                 }
             }
         }
+        private void btn_Undo_Click(object sender, EventArgs e)
+        {
+            Undo();
+
+        }
+        private void btnNewGame_Click(object sender, EventArgs e)
+        {
+            NewGame();
+            socketManager.Send(new SocketData((int)SocketCommand.NEW_GAME, "", new Point()));
+            pn_GameBoard.Enabled = true;
+        }
+        private void btnQuit_Click(object sender, EventArgs e)
+        {
+            Quit();
+        }
+        #endregion
+        #region hotkey
         // thiết lập form khi được mở lên là true
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -231,38 +258,8 @@ namespace GameCaro_Lan
                 Undo();
             }
         }
-        private void btn_Undo_Click(object sender, EventArgs e)
-        {
-            Undo();
-            
-        }
-
-        private void btnNewGame_Click(object sender, EventArgs e)
-        {
-            NewGame();
-            socketManager.Send(new SocketData((int)SocketCommand.NEW_GAME, "", new Point()));
-            pn_GameBoard.Enabled = true;
-        }
-
-        private void btnQuit_Click(object sender, EventArgs e)
-        {
-            Quit();
-        }
-
-
+        #endregion
         
-        private void ChessBoard_PlayerMarked(object sender, ButtonClickEvent e)
-        {
-            tmCoolDown.Start();
-            pn_GameBoard.Enabled = false;
-            prcbCoolDownSezo();
-            socketManager.Send(new SocketData((int)SocketCommand.SEND_POINT, "", e.ClickedPoint));
-
-            Listen();
-        }
-        public void prcbCoolDownSezo()
-        {
-            prcbCoolDown.Value = 0;
-        }
+        
     }
 }

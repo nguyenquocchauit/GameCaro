@@ -64,7 +64,7 @@ namespace GameCaro_Lan
             this.pn_GameBoard.BackColor = System.Drawing.Color.LightSteelBlue;
             this.pn_GameBoard.Location = new System.Drawing.Point(12, 30);
             this.pn_GameBoard.Name = "pn_GameBoard";
-            this.pn_GameBoard.Size = new System.Drawing.Size(443, 811);
+            this.pn_GameBoard.Size = new System.Drawing.Size(656, 811);
             this.pn_GameBoard.TabIndex = 0;
             // 
             // panel2
@@ -73,7 +73,7 @@ namespace GameCaro_Lan
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel2.Controls.Add(this.panel3);
             this.panel2.Controls.Add(this.pb_Logo);
-            this.panel2.Location = new System.Drawing.Point(480, 30);
+            this.panel2.Location = new System.Drawing.Point(693, 30);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(251, 208);
             this.panel2.TabIndex = 1;
@@ -104,7 +104,7 @@ namespace GameCaro_Lan
             this.panel4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel4.Controls.Add(this.pb_Avatar);
-            this.panel4.Location = new System.Drawing.Point(584, 493);
+            this.panel4.Location = new System.Drawing.Point(797, 493);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(147, 145);
             this.panel4.TabIndex = 2;
@@ -128,7 +128,7 @@ namespace GameCaro_Lan
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel5.Controls.Add(this.panel6);
             this.panel5.Controls.Add(this.pictureBox2);
-            this.panel5.Location = new System.Drawing.Point(480, 255);
+            this.panel5.Location = new System.Drawing.Point(693, 255);
             this.panel5.Name = "panel5";
             this.panel5.Size = new System.Drawing.Size(251, 208);
             this.panel5.TabIndex = 3;
@@ -158,7 +158,7 @@ namespace GameCaro_Lan
             // 
             this.txt_IP.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txt_IP.Location = new System.Drawing.Point(480, 810);
+            this.txt_IP.Location = new System.Drawing.Point(693, 810);
             this.txt_IP.Multiline = true;
             this.txt_IP.Name = "txt_IP";
             this.txt_IP.Size = new System.Drawing.Size(251, 31);
@@ -171,7 +171,7 @@ namespace GameCaro_Lan
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_LAN.BackColor = System.Drawing.Color.SpringGreen;
             this.btn_LAN.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_LAN.Location = new System.Drawing.Point(481, 755);
+            this.btn_LAN.Location = new System.Drawing.Point(694, 755);
             this.btn_LAN.Name = "btn_LAN";
             this.btn_LAN.Size = new System.Drawing.Size(248, 49);
             this.btn_LAN.TabIndex = 5;
@@ -185,7 +185,7 @@ namespace GameCaro_Lan
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_Undo.BackColor = System.Drawing.Color.SpringGreen;
             this.btn_Undo.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_Undo.Location = new System.Drawing.Point(481, 540);
+            this.btn_Undo.Location = new System.Drawing.Point(694, 540);
             this.btn_Undo.Name = "btn_Undo";
             this.btn_Undo.Size = new System.Drawing.Size(102, 49);
             this.btn_Undo.TabIndex = 6;
@@ -197,7 +197,7 @@ namespace GameCaro_Lan
             // 
             this.prcbCoolDown.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.prcbCoolDown.Location = new System.Drawing.Point(480, 704);
+            this.prcbCoolDown.Location = new System.Drawing.Point(693, 704);
             this.prcbCoolDown.Name = "prcbCoolDown";
             this.prcbCoolDown.Size = new System.Drawing.Size(249, 41);
             this.prcbCoolDown.TabIndex = 7;
@@ -207,7 +207,7 @@ namespace GameCaro_Lan
             this.txt_PlayerName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txt_PlayerName.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txt_PlayerName.Location = new System.Drawing.Point(480, 652);
+            this.txt_PlayerName.Location = new System.Drawing.Point(693, 652);
             this.txt_PlayerName.Multiline = true;
             this.txt_PlayerName.Name = "txt_PlayerName";
             this.txt_PlayerName.Size = new System.Drawing.Size(251, 38);
@@ -246,7 +246,7 @@ namespace GameCaro_Lan
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(741, 853);
+            this.ClientSize = new System.Drawing.Size(954, 853);
             this.Controls.Add(this.btnQuit);
             this.Controls.Add(this.btnNewGame);
             this.Controls.Add(this.txt_PlayerName);
@@ -259,7 +259,7 @@ namespace GameCaro_Lan
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.pn_GameBoard);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Game Caro";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Shown += new System.EventHandler(this.Form1_Shown);
