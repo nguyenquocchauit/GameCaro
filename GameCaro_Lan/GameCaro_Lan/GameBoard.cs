@@ -10,12 +10,13 @@ namespace GameCaro_Lan
 {
     public class GameBoard
     {
-        #region Properties
+        #region Thuộc tính cần dùng
         private Timer timerStop;
         private Panel chessBoard;
         private PictureBox avatar;
         private TextBox playerName;
         private int currentPlayer;
+        private ProgressBar prcbCoolDown;
         private List<List<Button>> matrixPositions;
         private Stack<PlayInfo> playTimeLine;
         private List<Player> players;
@@ -27,7 +28,7 @@ namespace GameCaro_Lan
         internal Stack<PlayInfo> PlayTimeLine { get => playTimeLine; set => playTimeLine = value; }
         public PictureBox Avatar { get => avatar; set => avatar = value; }
         public Timer TimerStop { get => timerStop; set => timerStop = value; }
-
+        public ProgressBar PrcbCoolDown { get => prcbCoolDown; set => prcbCoolDown = value; }
         private event EventHandler<ButtonClickEvent> playerMarked;
         public event EventHandler<ButtonClickEvent> PlayerMarked
         {
@@ -42,14 +43,16 @@ namespace GameCaro_Lan
         }
         #endregion
         #region Initialize
-        public GameBoard(Panel board, TextBox PlayerName, PictureBox Avatar, Timer Timer)
+        public GameBoard(Panel board, TextBox PlayerName, PictureBox Avatar, Timer Timer, ProgressBar prcbCoolDown)
         {
             this.TimerStop = Timer;
             this.chessBoard = board;
             this.PlayerName = PlayerName;
             this.Avatar = Avatar;
+            this.PrcbCoolDown = prcbCoolDown;
             this.Players = new List<Player>()
             {
+                // thiết lập tên, hình ảnh và kí tự người chơi
                 new Player("Quốc Châu(X)", Image.FromFile(Application.StartupPath + "\\Image\\NQC.jpg"),
                                         Image.FromFile(Application.StartupPath + "\\Image\\X.png")),
 
@@ -58,10 +61,11 @@ namespace GameCaro_Lan
             };
         }
         #endregion
-        #region Methods  
+        #region xử lý game  
+        // hàm vẽ bàn cờ
         public void DrawGameBoard()
         {
-            ChessBoard.Controls.Clear();
+            ChessBoard.Controls.Clear(); // làm mới form mỗi lần newgame
             ChessBoard.Enabled = true;
             PlayTimeLine = new Stack<PlayInfo>();
             MatrixPositions = new List<List<Button>>();
@@ -82,30 +86,30 @@ namespace GameCaro_Lan
                         BackgroundImageLayout = ImageLayout.Stretch,
                         Tag = i.ToString()
                     };
-
                     btn.Click += Btn_Click;
-
-                    chessBoard.Controls.Add(btn);
-
-                    MatrixPositions[i].Add(btn);
-
+                    chessBoard.Controls.Add(btn); // in ô đánh ra form
+                    MatrixPositions[i].Add(btn); // lưu ô đánh thành mảng
                     oldButton = btn;
                 }
+                // thiết lập oldbutton có tọa độ được cập nhật xuống một dòng
                 oldButton.Location = new Point(0, oldButton.Location.Y + Constant.CellHeight);
                 oldButton.Width = 0;
                 oldButton.Height = 0;
             }
         }
+        // hàm in tên và thay đổi kí tự người chơi thông qua thuộc tính CurrentPlayer (0/1)
         private void ChangePlayer()
         {
             PlayerName.Text = Players[CurrentPlayer].Name;
             Avatar.Image = Players[CurrentPlayer].Avatar;
         }
+        // hàm in hình ảnh ký tự ra bàn cờ thông qua thuộc tính CurrentPlayer
         private void Symbol(Button btn)
         {
             btn.BackgroundImage = Players[CurrentPlayer].Symbol;
             CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
         }
+        // hàm xử xử lý đánh ô đánh trên bàn cờ
         private void Btn_Click(object sender, EventArgs e)
         {
             Button btn = sender as Button;
@@ -114,18 +118,13 @@ namespace GameCaro_Lan
             Symbol(btn);
             PlayTimeLine.Push(new PlayInfo(GetChessPoint(btn), CurrentPlayer, btn.BackgroundImage));
             ChangePlayer();
+
             if (playerMarked != null)
                 playerMarked(this, new ButtonClickEvent(GetChessPoint(btn)));
             if (isEndGame(btn))
                 EndGame();
         }
-        public void EndGame()
-        {
-            TimerStop.Stop();
-            MessageBox.Show(Players[CurrentPlayer == 1 ? 0 : 1].Name + " chiến thắng");
-            ChessBoard.Enabled = false;
-            DrawGameBoard();
-        }
+        // hàm xử xử lý đánh ô đánh trên bàn cờ dành cho 2 người chơi
         public void OtherPlayerClicked(Point point)
         {
             Button btn = MatrixPositions[point.Y][point.X];
@@ -137,11 +136,33 @@ namespace GameCaro_Lan
             if (isEndGame(btn))
                 EndGame();
         }
-        
+        // hàm kết thúc game và vẽ lại bàn cờ
+        public void EndGame()
+        {
+            TimerStop.Stop();
+            MessageBox.Show(Players[CurrentPlayer == 1 ? 0 : 1].Name + " chiến thắng");
+            ChessBoard.Enabled = false;
+            DrawGameBoard();
+        }
+        // hàm thiết lập lại thanh progressbar về bằng 0 tiện dùng lại nhiều lần
+        public void prcbCoolDownZero()
+        {
+            PrcbCoolDown.Value = 0;
+        }
+        // hàm làm mới game
+        public void NewGame()
+        {
+            prcbCoolDownZero();
+            timerStop.Stop();
+            DrawGameBoard();
+
+        }
+        // hàm kết thúc game nếu thỏa các trường hợp kết thúc game
         private bool isEndGame(Button btn)
         {
             return isEndRow(btn) || isEndCol(btn) || isEndAuxiliaryDiagonal(btn) || isEndMainDiagonal(btn);
         }
+        // hàm lấy tọa độ button đã được đánh
         private Point GetChessPoint(Button btn)
         {
             int vertical = Convert.ToInt32(btn.Tag);
@@ -149,6 +170,7 @@ namespace GameCaro_Lan
             Point point = new Point(horizontal, vertical);
             return point;
         }
+        // xét thắng theo hàng ngang
         private bool isEndRow(Button btn)
         {
             Point point = GetChessPoint(btn);
@@ -177,6 +199,7 @@ namespace GameCaro_Lan
             
             return countLeft + countRight >= 5;
         }
+        // xét thắng theo dọc
         private bool isEndCol(Button btn)
         {
             Point point = GetChessPoint(btn);
@@ -205,6 +228,7 @@ namespace GameCaro_Lan
 
             return countTop + countBottom >= 5;
         }
+        // xét thắng theo đường chéo chính
         private bool isEndMainDiagonal(Button btn)
         {
             Point point = GetChessPoint(btn);
@@ -239,6 +263,7 @@ namespace GameCaro_Lan
 
             return countTop + countBottom >= 5;
         }
+        // xét thắng theo đường chép phụ
         private bool isEndAuxiliaryDiagonal(Button btn)
         {
             Point point = GetChessPoint(btn);
@@ -273,6 +298,7 @@ namespace GameCaro_Lan
 
             return countTop + countBottom >= 5;
         }
+        // hàm đánh lại. Quay lại 2 nước để dễ tính trạng thái CurrentPlayer đối với form đánh hai người . Nếu một người thì không cần
         public bool Undo()
         {
             //if (PlayTimeLine.Count <= 0)
@@ -280,20 +306,14 @@ namespace GameCaro_Lan
             //    return false;
             //}
             //PlayInfo oldPoint = PlayTimeLine.Peek();
-
             return UndoAsStep() && UndoAsStep();
         }
-
+        // hàm lấy đánh lại
         private bool UndoAsStep()
         {
-
-
             PlayInfo oldPoint = PlayTimeLine.Pop();
             Button btn = MatrixPositions[oldPoint.Point.Y][oldPoint.Point.X];
-
             btn.BackgroundImage = null;
-
-
             //if (PlayTimeLine.Count <= 0)
             //{
             //    CurrentPlayer = 0;
@@ -302,13 +322,12 @@ namespace GameCaro_Lan
             //{
             //    oldPoint = PlayTimeLine.Peek();
             //}
-
             ChangePlayer();
-
             return true;
         }
         #endregion
     }
+    
     public class ButtonClickEvent : EventArgs
     {
         private Point clickedPoint;

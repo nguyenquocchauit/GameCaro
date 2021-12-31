@@ -31,6 +31,5 @@ namespace GameCaro_Lan
         UNDO,
         END_GAME,
         TIME_OUT,
-        QUIT
-    }
+        QUIT    }
 }

@@ -17,33 +17,22 @@ namespace GameCaro_Lan
         #region Porperties
         SocketManager socketManager;
         GameBoard chessBoardManager;
-        
         #endregion
         public Form1()
         {
             InitializeComponent();
-
             Control.CheckForIllegalCrossThreadCalls = false;
-
-            chessBoardManager = new GameBoard(pn_GameBoard, txt_PlayerName, pb_Avatar, tmCoolDown);
-            
-
-
+            chessBoardManager = new GameBoard(pn_GameBoard, txt_PlayerName, pb_Avatar, tmCoolDown, prcbCoolDown);
+            socketManager = new SocketManager();
             chessBoardManager.PlayerMarked += ChessBoard_PlayerMarked;
-
             prcbCoolDown.Step = Constant.COOL_DOWN_STEP;
             prcbCoolDown.Maximum = Constant.COOL_DOWN_TIME;
-            prcbCoolDownZero();
-
+            chessBoardManager.prcbCoolDownZero();
             tmCoolDown.Interval = Constant.COOL_DOWN_INTERVAL;
-
-            NewGame();
-
-            socketManager = new SocketManager();
-
+            chessBoardManager.NewGame();
         }
         #region Connect LAN
-        // Kết nối LAN bằng nút bấm 
+        // Kết nối LAN bằng nút bấm. Sau khi kết nối sẽ đóng chức năng kết nối LAN lần nữa tránh bị lỗi (giải pháp tạm thời)
         private void btn_LAN_Click(object sender, EventArgs e)
         {
             // Form nào click trước sẽ là Server và ngược lại là Client
@@ -62,18 +51,8 @@ namespace GameCaro_Lan
                 MessageBox.Show("Kết nối thành công!");
                 btn_LAN.Enabled = false;
                 Listen();
-
             }
 
-        }
-        // Form shown sẽ hiện IPV4 để dùng kết nối LAN
-        private void Form1_Shown(object sender, EventArgs e)
-        {
-            txt_IP.Text = socketManager.GetLocalIPv4(NetworkInterfaceType.Wireless80211);
-            if (string.IsNullOrEmpty(txt_IP.Text))
-            {
-                txt_IP.Text = socketManager.GetLocalIPv4(NetworkInterfaceType.Ethernet);
-            }
         }
         // hàm lắng nghe để trao đổi gói tin qua lại khi thực hiện các thao tác trên form
         private void Listen()
@@ -92,7 +71,6 @@ namespace GameCaro_Lan
                         }
                         catch (Exception e)
                         {
-
                         }
                         Thread.Sleep(10);
                     }
@@ -101,11 +79,10 @@ namespace GameCaro_Lan
                 listernThread.Start();
             }
             catch
-            {
-
+            { 
             }
         }
-        // Xử lý data khi được send
+        // Xử lý dât khi được send
         private void ProcessData(SocketData data)
         {
             switch (data.Command)
@@ -116,29 +93,28 @@ namespace GameCaro_Lan
                 case (int)SocketCommand.NEW_GAME:
                     this.Invoke((MethodInvoker)(() =>
                     {
-                        NewGame();
+                        chessBoardManager.NewGame();
                         pn_GameBoard.Enabled = false;
+                        btn_Undo.Enabled = false; // đóng chức năng đánh lại khi chưa được đánh lượt nào tránh lỗi game
                     }));
                     break;
                 case (int)SocketCommand.SEND_POINT:
                     this.Invoke((MethodInvoker)(() => {
-                        prcbCoolDownZero();
+                        chessBoardManager.prcbCoolDownZero();
                         pn_GameBoard.Enabled = true;
                         btn_Undo.Enabled = true;
                         tmCoolDown.Start();
-                        chessBoardManager.OtherPlayerClicked(data.Point);
+                        chessBoardManager.OtherPlayerClicked(data.Point); // gửi lượt đánh
                     }));
                     break;
                 case (int)SocketCommand.UNDO:
                     chessBoardManager.Undo();
-                    prcbCoolDownZero();
+                    chessBoardManager.prcbCoolDownZero();
                     break;
                 case (int)SocketCommand.TIME_OUT:
                     string name = chessBoardManager.Players[chessBoardManager.CurrentPlayer == 1 ? 0 : 1].Name;
-                    tmCoolDown.Stop();
                     MessageBox.Show(name + " Thắng cuộc");
-                    EndGame();
-                    
+                    chessBoardManager.EndGame();
                     break;
                 case (int)SocketCommand.QUIT:
                     tmCoolDown.Stop();
@@ -147,65 +123,47 @@ namespace GameCaro_Lan
                 default:
                     break;
             }
-
             Listen();
         }
-        private void ChessBoard_PlayerMarked(object sender, ButtonClickEvent e)
+        // hàm xử lý gửi lượt đánh và lắng nghe người chơi còn lại thực hiện hành động đánh 
+        void ChessBoard_PlayerMarked(object sender, ButtonClickEvent e)
         {
+            tmCoolDown.Start();
+            prcbCoolDown.Value = 0;
             tmCoolDown.Start();
             pn_GameBoard.Enabled = false;
             btn_Undo.Enabled = false;
-            prcbCoolDownZero();
+            chessBoardManager.prcbCoolDownZero();
             socketManager.Send(new SocketData((int)SocketCommand.SEND_POINT, "", e.ClickedPoint));
             Listen();
         }
-
         #endregion
-        #region time form 
+        #region xử lý sự kiện game(thời gian, đánh lại, thoát game và button form)
+        // đếm thời gian lượt của người chơi. vượt quá thời gian cho phép sẽ kết thúc game 2 form
         private void tmCoolDown_Tick(object sender, EventArgs e)
         {
-
             prcbCoolDown.PerformStep();
             if (prcbCoolDown.Value >= prcbCoolDown.Maximum)
             {
-                EndGame();
+                chessBoardManager.EndGame();
                 socketManager.Send(new SocketData((int)SocketCommand.TIME_OUT, "", new Point()));
             }
         }
-        public void prcbCoolDownZero()
-        {
-            prcbCoolDown.Value = 0;
-        }
-        #endregion
-        #region eventgame 
-        public void EndGame()
-        {
-            tmCoolDown.Stop();
-            pn_GameBoard.Enabled = false;
-            //MessageBox.Show("Kết thúc game");
-        }
-        public void NewGame()
-        {
-
-            prcbCoolDownZero();
-            tmCoolDown.Stop();
-            chessBoardManager.DrawGameBoard();
-
-        }
+        // đánh lại nước đánh(người thực hiện đánh lại) và gửi commnand tới form người chơi
         public void Undo()
         {
-
-            prcbCoolDownZero();
+            chessBoardManager.prcbCoolDownZero();
             chessBoardManager.Undo();
             socketManager.Send(new SocketData((int)SocketCommand.UNDO, "", new Point()));
         }
-        void Quit()
+        // thoát game cơ bản của button Quit
+        public void Quit()
         {
             if (MessageBox.Show("Bạn có chắc muốn thoát chương trình ?", "Thông báo", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
                 Application.Exit();
         }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        // xử lý form đóng sẽ thoát game và gửi commnand tới form người chơi
+        void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (MessageBox.Show("Bạn có chắc muốn thoát chương trình ?", "Thông báo", MessageBoxButtons.OKCancel) != System.Windows.Forms.DialogResult.OK)
                 e.Cancel = true;
@@ -220,29 +178,41 @@ namespace GameCaro_Lan
                 }
             }
         }
+        // nút bấm đánh lại
         private void btn_Undo_Click(object sender, EventArgs e)
         {
             Undo();
-
         }
+        // nút bấm làm mới game và gửi commnand tới form người chơi
         private void btnNewGame_Click(object sender, EventArgs e)
         {
-            NewGame();
+            chessBoardManager.NewGame();
             socketManager.Send(new SocketData((int)SocketCommand.NEW_GAME, "", new Point()));
             pn_GameBoard.Enabled = true;
         }
+        // nút bấm thoát game
         private void btnQuit_Click(object sender, EventArgs e)
         {
             Quit();
         }
         #endregion
-        #region hotkey
+        #region Thiết lập form và phím tắt
         // thiết lập form khi được mở lên là true
         private void Form1_Load(object sender, EventArgs e)
         {
             this.KeyPreview = true;
-
+            btn_Undo.Enabled = false; // form khi được mở lên sẽ không có chức năng đánh lại (vì chưa được đánh)
         }
+        // Form shown sẽ hiện IPV4 để dùng kết nối LAN
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            txt_IP.Text = socketManager.GetLocalIPv4(NetworkInterfaceType.Wireless80211);
+            if (string.IsNullOrEmpty(txt_IP.Text))
+            {
+                txt_IP.Text = socketManager.GetLocalIPv4(NetworkInterfaceType.Ethernet);
+            }
+        }
+        // Thiết lập phím tắt cho form
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control == true && e.KeyCode == Keys.Q)
@@ -251,7 +221,9 @@ namespace GameCaro_Lan
             }
             if (e.Control == true && e.KeyCode == Keys.N)
             {
-                NewGame();
+                socketManager.Send(new SocketData((int)SocketCommand.NEW_GAME, "", new Point()));
+                chessBoardManager.NewGame();
+                pn_GameBoard.Enabled = true;
             }
             if (e.Control == true && e.KeyCode == Keys.Z)
             {
@@ -259,7 +231,6 @@ namespace GameCaro_Lan
             }
         }
         #endregion
-        
-        
+
     }
 }

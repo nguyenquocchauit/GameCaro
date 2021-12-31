@@ -52,13 +52,11 @@ namespace GameCaro_Lan
             acceptClient.Start();
         }
         #endregion
-
         #region Both
         public string IP = "127.0.0.1";
         public int PORT = 9999;
         public const int BUFFER = 1024;
         public bool isServer = true;
-
         public bool Send(object data)
         {
             byte[] sendData = SerializeData(data);

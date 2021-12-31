@@ -185,7 +185,7 @@ namespace GameCaro_Lan
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_Undo.BackColor = System.Drawing.Color.SpringGreen;
             this.btn_Undo.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_Undo.Location = new System.Drawing.Point(694, 540);
+            this.btn_Undo.Location = new System.Drawing.Point(696, 540);
             this.btn_Undo.Name = "btn_Undo";
             this.btn_Undo.Size = new System.Drawing.Size(102, 49);
             this.btn_Undo.TabIndex = 6;
@@ -258,6 +258,8 @@ namespace GameCaro_Lan
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.pn_GameBoard);
+            this.MaximumSize = new System.Drawing.Size(1900, 900);
+            this.MinimumSize = new System.Drawing.Size(972, 900);
             this.Name = "Form1";
             this.Text = "Game Caro";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
