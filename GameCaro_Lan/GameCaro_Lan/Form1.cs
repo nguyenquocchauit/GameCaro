@@ -159,13 +159,15 @@ namespace GameCaro_Lan
         // thoát game cơ bản của button Quit
         public void Quit()
         {
-            if (MessageBox.Show("Bạn có chắc muốn thoát chương trình ?", "Thông báo", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
+            if (MessageBox.Show("Bạn có chắc muốn thoát chương trình ?", "Thông báo", MessageBoxButtons.OKCancel) 
+                == System.Windows.Forms.DialogResult.OK)
                 Application.Exit();
         }
         // xử lý form đóng sẽ thoát game và gửi commnand tới form người chơi
         void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (MessageBox.Show("Bạn có chắc muốn thoát chương trình ?", "Thông báo", MessageBoxButtons.OKCancel) != System.Windows.Forms.DialogResult.OK)
+            if (MessageBox.Show("Bạn có chắc muốn thoát chương trình ?", "Thông báo", MessageBoxButtons.OKCancel) 
+                != System.Windows.Forms.DialogResult.OK)
                 e.Cancel = true;
             else
             {
